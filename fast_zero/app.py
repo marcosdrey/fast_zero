@@ -30,3 +30,8 @@ def create_user(user: schemas.UserSchema):
 
     database.append(new_user)
     return new_user
+
+
+@app.get("/users/", response_model=schemas.UserList)
+def get_users():
+    return {"users": database}

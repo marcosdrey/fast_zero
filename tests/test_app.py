@@ -29,3 +29,16 @@ def test_create_user_with_username_that_already_exists(
     assert same_user_response.json() == {
         "detail": "Username already exists"
     }
+
+
+def test_get_users(client):
+    response = client.get("/users/")
+
+    assert response.status_code == status.HTTP_200_OK
+    assert response.json() == {
+        "users": [{
+            "username": "alice",
+            "email": "alice@example.com",
+            "id": 1,
+        }]
+    }
