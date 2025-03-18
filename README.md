@@ -1,1 +1,1 @@
-Project to fix and masterize FastAPI and good practices
+Project to fix and master FastAPI and good practices
