@@ -8,15 +8,9 @@ def test_root_should_return_ok_and_hello_world(client):
     assert response.json() == {"message": "Olá Mundo!"}
 
 
-def test_create_valid_user(client):
-    response = client.post(
-        "/users/",
-        json={
-            "username": "alice",
-            "email": "alice@example.com",
-            "password": "supersecretpassword",
-        },
-    )
+def test_create_valid_user(client, mock_valid_user):
+    response = client.post("/users/", json=mock_valid_user)
+
     assert response.status_code == status.HTTP_201_CREATED
     assert response.json() == {
         "username": "alice",
@@ -25,23 +19,12 @@ def test_create_valid_user(client):
     }
 
 
-def test_create_user_with_username_that_already_exists(client):
-    client.post(
-        "/users/",
-        json={
-            "username": "alice",
-            "email": "alice@example.com",
-            "password": "supersecretpassword",
-        },
-    )
-    same_user_response = client.post(
-        "/users/",
-        json={
-            "username": "alice",
-            "email": "alice@example.com",
-            "password": "supersecretpassword",
-        },
-    )
+def test_create_user_with_username_that_already_exists(
+    client, mock_valid_user
+):
+    client.post("/users/", json=mock_valid_user)
+    same_user_response = client.post("/users/", json=mock_valid_user)
+
     assert same_user_response.status_code == status.HTTP_409_CONFLICT
     assert same_user_response.json() == {
         "detail": "Username already exists"
