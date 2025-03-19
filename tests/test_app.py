@@ -79,3 +79,20 @@ def test_update_user_that_does_not_exist(client, mock_valid_updated_user):
     assert response.json() == {
         "detail": "User not found"
     }
+
+
+def test_delete_user(client):
+    response = client.delete(
+        "/users/1/"
+    )
+    assert response.status_code == status.HTTP_204_NO_CONTENT
+
+
+def test_delete_user_that_does_not_exist(client):
+    response = client.delete(
+        "/users/0/",
+    )
+    assert response.status_code == status.HTTP_404_NOT_FOUND
+    assert response.json() == {
+        "detail": "User not found"
+    }
