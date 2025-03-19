@@ -7,11 +7,6 @@ app = FastAPI()
 database: list[schemas.UserDB] = []
 
 
-@app.get("/")
-def read_root():
-    return {"message": "Olá Mundo!"}
-
-
 @app.post(
     "/users/",
     status_code=status.HTTP_201_CREATED,
