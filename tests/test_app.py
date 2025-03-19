@@ -35,3 +35,27 @@ def test_get_users(client):
             "id": 1,
         }]
     }
+
+
+def test_update_user(client, mock_valid_updated_user):
+    response = client.put(
+        "/users/1/",
+        json=mock_valid_updated_user
+    )
+    assert response.status_code == status.HTTP_200_OK
+    assert response.json() == {
+        "username": mock_valid_updated_user["username"],
+        "email": mock_valid_updated_user["email"],
+        "id": 1,
+    }
+
+
+def test_update_user_that_does_not_exist(client, mock_valid_updated_user):
+    response = client.put(
+        "/users/0/",
+        json=mock_valid_updated_user
+    )
+    assert response.status_code == status.HTTP_404_NOT_FOUND
+    assert response.json() == {
+        "detail": "User not found"
+    }

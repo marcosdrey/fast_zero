@@ -30,3 +30,16 @@ def create_user(user: schemas.UserSchema):
 @app.get("/users/", response_model=schemas.UserList)
 def get_users():
     return {"users": database}
+
+
+@app.put("/users/{user_id}", response_model=schemas.UserPublic)
+def update_users(user_id: int, user: schemas.UserSchema):
+    if user_id > len(database) or user_id < 1:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="User not found"
+        )
+    user_with_id = schemas.UserDB(**user.model_dump(), id=user_id)
+    database[user_id - 1] = user_with_id
+
+    return user_with_id
