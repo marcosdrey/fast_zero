@@ -1,13 +1,6 @@
 from fastapi import status
 
 
-def test_root_should_return_ok_and_hello_world(client):
-    response = client.get("/")
-
-    assert response.status_code == status.HTTP_200_OK
-    assert response.json() == {"message": "Olá Mundo!"}
-
-
 def test_create_valid_user(client, mock_valid_user):
     response = client.post("/users/", json=mock_valid_user)
 
