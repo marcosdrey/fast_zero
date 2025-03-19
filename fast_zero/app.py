@@ -36,8 +36,7 @@ def create_user(user: schemas.UserSchema):
 def get_user(user_id: int):
     if user_id > len(database) or user_id < 1:
         raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="User not found"
+            status_code=status.HTTP_404_NOT_FOUND, detail="User not found"
         )
     return database[user_id - 1]
 
@@ -46,8 +45,7 @@ def get_user(user_id: int):
 def update_user(user_id: int, user: schemas.UserSchema):
     if user_id > len(database) or user_id < 1:
         raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="User not found"
+            status_code=status.HTTP_404_NOT_FOUND, detail="User not found"
         )
     user_with_id = schemas.UserDB(**user.model_dump(), id=user_id)
     database[user_id - 1] = user_with_id
@@ -59,7 +57,6 @@ def update_user(user_id: int, user: schemas.UserSchema):
 def delete_user(user_id: int):
     if user_id > len(database) or user_id < 1:
         raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="User not found"
+            status_code=status.HTTP_404_NOT_FOUND, detail="User not found"
         )
     del database[user_id - 1]

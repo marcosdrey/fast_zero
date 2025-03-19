@@ -23,5 +23,5 @@ def mock_valid_updated_user():
     return {
         "username": "edited_user",
         "email": "edited_user@example.com",
-        "password": "editedsecretpassword"
+        "password": "editedsecretpassword",
     }
