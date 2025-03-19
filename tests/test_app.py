@@ -37,6 +37,26 @@ def test_get_users(client):
     }
 
 
+def test_get_user(client):
+    response = client.get("/users/1/")
+
+    assert response.status_code == status.HTTP_200_OK
+    assert response.json() == {
+        "username": "alice",
+        "email": "alice@example.com",
+        "id": 1,
+    }
+
+
+def test_get_user_that_does_not_exist(client):
+    response = client.get("/users/0/")
+
+    assert response.status_code == status.HTTP_404_NOT_FOUND
+    assert response.json() == {
+        "detail": "User not found"
+    }
+
+
 def test_update_user(client, mock_valid_updated_user):
     response = client.put(
         "/users/1/",
