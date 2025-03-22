@@ -6,6 +6,7 @@ from sqlalchemy.orm import Session
 from fast_zero import schemas
 from fast_zero.database import get_session
 from fast_zero.models import User
+from fast_zero.security import get_password_hash
 
 app = FastAPI()
 
@@ -42,7 +43,13 @@ def create_user(
                 status.HTTP_409_CONFLICT, detail="Email already exists"
             )
 
-    new_user = User(**user.model_dump())
+    hashed_password = get_password_hash(user.password)
+
+    new_user = User(
+        username=user.username,
+        email=user.email,
+        password=hashed_password
+    )
     session.add(new_user)
     session.commit()
     session.refresh(new_user)
@@ -77,7 +84,7 @@ def update_user(
     try:
         db_user.username = user.username
         db_user.email = user.email
-        db_user.password = user.password
+        db_user.password = get_password_hash(user.password)
         session.commit()
         session.refresh(db_user)
 
