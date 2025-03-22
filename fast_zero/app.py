@@ -9,6 +9,7 @@ from fast_zero.database import get_session
 from fast_zero.models import User
 from fast_zero.security import (
     create_access_token,
+    get_current_user,
     get_password_hash,
     verify_password,
 )
@@ -76,22 +77,21 @@ def update_user(
     user_id: int,
     user: schemas.UserSchema,
     session: Session = Depends(get_session),
+    current_user: User = Depends(get_current_user),
 ):
-    db_user = session.scalar(select(User).where(User.id == user_id))
-
-    if not db_user:
+    if current_user.id != user_id:
         raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail="User not found"
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="You don't have permission to do this",
         )
-
     try:
-        db_user.username = user.username
-        db_user.email = user.email
-        db_user.password = get_password_hash(user.password)
+        current_user.username = user.username
+        current_user.email = user.email
+        current_user.password = get_password_hash(user.password)
         session.commit()
-        session.refresh(db_user)
+        session.refresh(current_user)
 
-        return db_user
+        return current_user
 
     except IntegrityError:
         raise HTTPException(
@@ -101,15 +101,18 @@ def update_user(
 
 
 @app.delete("/users/{user_id}/", status_code=status.HTTP_204_NO_CONTENT)
-def delete_user(user_id: int, session: Session = Depends(get_session)):
-    db_user = session.scalar(select(User).where(User.id == user_id))
-
-    if not db_user:
+def delete_user(
+    user_id: int,
+    session: Session = Depends(get_session),
+    current_user: User = Depends(get_current_user),
+):
+    if current_user.id != user_id:
         raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail="User not found"
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="You don't have permission to do this",
         )
 
-    session.delete(db_user)
+    session.delete(current_user)
     session.commit()
 
 
