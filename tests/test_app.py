@@ -110,3 +110,16 @@ def test_delete_user_that_does_not_exist(client):
     )
     assert response.status_code == status.HTTP_404_NOT_FOUND
     assert response.json() == {"detail": "User not found"}
+
+
+def test_get_token(client, user):
+    response = client.post(
+        "/token", data={
+            "username": user.username,
+            "password": user.clean_password
+        }
+    )
+
+    assert response.status_code == status.HTTP_200_OK
+    assert "access_token" in response.json()
+    assert "token_type" in response.json()
