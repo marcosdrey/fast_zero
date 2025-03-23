@@ -1,6 +1,6 @@
 from typing import Annotated
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy import select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
@@ -17,11 +17,14 @@ router = APIRouter(prefix="/users", tags=["users"])
 
 T_Session = Annotated[Session, Depends(get_session)]
 CurrentUser = Annotated[User, Depends(get_current_user)]
+Pagination = Annotated[schemas.FilterPage, Query()]
 
 
 @router.get("/", response_model=schemas.UserList)
-def read_users(session: T_Session, skip: int = 0, limit: int = 100):
-    users = session.scalars(select(User).offset(skip).limit(limit)).all()
+def read_users(session: T_Session, pagination: Pagination):
+    users = session.scalars(
+        select(User).offset(pagination.offset).limit(pagination.limit)
+    ).all()
     return {"users": users}
 
 
