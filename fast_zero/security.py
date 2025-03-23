@@ -16,7 +16,7 @@ SECRET_KEY = "my-secret-key"
 ALGORITHM = "HS256"
 
 pwd_ctx = PasswordHash.recommended()
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="auth/token")
 
 
 def create_access_token(data: dict):

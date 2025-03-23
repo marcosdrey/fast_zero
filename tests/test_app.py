@@ -138,7 +138,7 @@ def test_delete_user_without_permission(client, token, mock_valid_user):
 
 def test_get_token(client, user):
     response = client.post(
-        "/token",
+        "/auth/token",
         data={"username": user.username, "password": user.clean_password},
     )
 
@@ -149,7 +149,7 @@ def test_get_token(client, user):
 
 def test_get_token_invalid_username(client, user):
     response = client.post(
-        "/token",
+        "/auth/token",
         data={"username": "wrong-username", "password": user.clean_password},
     )
 
@@ -159,7 +159,7 @@ def test_get_token_invalid_username(client, user):
 
 def test_get_token_invalid_password(client, user):
     response = client.post(
-        "/token",
+        "/auth/token",
         data={"username": user.username, "password": "wrong-password"},
     )
 
