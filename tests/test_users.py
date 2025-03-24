@@ -3,7 +3,7 @@ from fastapi import status
 from fast_zero.schemas import UserPublic
 
 
-def test_create_valid_user(client, mock_valid_user):
+def test_create_user(client, mock_valid_user):
     response = client.post("/users/", json=mock_valid_user)
 
     assert response.status_code == status.HTTP_201_CREATED

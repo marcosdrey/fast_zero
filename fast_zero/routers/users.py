@@ -3,7 +3,7 @@ from typing import Annotated
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy import select
 from sqlalchemy.exc import IntegrityError
-from sqlalchemy.orm import Session
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from fast_zero import schemas
 from fast_zero.database import get_session
@@ -15,16 +15,17 @@ from fast_zero.security import (
 
 router = APIRouter(prefix="/users", tags=["users"])
 
-T_Session = Annotated[Session, Depends(get_session)]
+Session = Annotated[AsyncSession, Depends(get_session)]
 CurrentUser = Annotated[User, Depends(get_current_user)]
 Pagination = Annotated[schemas.FilterPage, Query()]
 
 
 @router.get("/", response_model=schemas.UserList)
-def read_users(session: T_Session, pagination: Pagination):
-    users = session.scalars(
+async def read_users(session: Session, pagination: Pagination):
+    query = await session.scalars(
         select(User).offset(pagination.offset).limit(pagination.limit)
-    ).all()
+    )
+    users = query.all()
     return {"users": users}
 
 
@@ -33,8 +34,8 @@ def read_users(session: T_Session, pagination: Pagination):
     status_code=status.HTTP_201_CREATED,
     response_model=schemas.UserPublic,
 )
-def create_user(session: T_Session, user: schemas.UserSchema):
-    new_user = session.scalar(
+async def create_user(session: Session, user: schemas.UserSchema):
+    new_user = await session.scalar(
         select(User).where(
             (User.username == user.username) | (User.email == user.email)
         )
@@ -56,15 +57,15 @@ def create_user(session: T_Session, user: schemas.UserSchema):
         username=user.username, email=user.email, password=hashed_password
     )
     session.add(new_user)
-    session.commit()
-    session.refresh(new_user)
+    await session.commit()
+    await session.refresh(new_user)
 
     return new_user
 
 
 @router.get("/{user_id}", response_model=schemas.UserPublic)
-def read_user(session: T_Session, user_id: int):
-    user = session.scalar(select(User).where(User.id == user_id))
+async def read_user(session: Session, user_id: int):
+    user = await session.scalar(select(User).where(User.id == user_id))
 
     if not user:
         raise HTTPException(
@@ -74,8 +75,8 @@ def read_user(session: T_Session, user_id: int):
 
 
 @router.put("/{user_id}", response_model=schemas.UserPublic)
-def update_user(
-    session: T_Session,
+async def update_user(
+    session: Session,
     current_user: CurrentUser,
     user_id: int,
     user: schemas.UserSchema,
@@ -89,8 +90,8 @@ def update_user(
         current_user.username = user.username
         current_user.email = user.email
         current_user.password = get_password_hash(user.password)
-        session.commit()
-        session.refresh(current_user)
+        await session.commit()
+        await session.refresh(current_user)
 
         return current_user
 
@@ -102,8 +103,8 @@ def update_user(
 
 
 @router.delete("/{user_id}", status_code=status.HTTP_204_NO_CONTENT)
-def delete_user(
-    session: T_Session,
+async def delete_user(
+    session: Session,
     current_user: CurrentUser,
     user_id: int,
 ):
@@ -113,5 +114,5 @@ def delete_user(
             detail="You don't have permission to do this",
         )
 
-    session.delete(current_user)
-    session.commit()
+    await session.delete(current_user)
+    await session.commit()
