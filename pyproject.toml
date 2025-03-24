@@ -27,6 +27,7 @@ taskipy = "^1.14.1"
 pytest = "^8.3.5"
 pytest-cov = "^6.0.0"
 ruff = "^0.11.0"
+pytest-asyncio = "^0.25.3"
 
 [tool.ruff]
 line-length = 79
@@ -39,6 +40,7 @@ select = ['I', 'F', 'E', 'W', 'PL', 'PT', 'FAST']
 [tool.pytest.ini_options]
 pythonpath = "."
 addopts = '-p no:warnings'
+asyncio_default_fixture_loop_scope = 'function'
 
 [tool.taskipy.tasks]
 lint = 'ruff check'
