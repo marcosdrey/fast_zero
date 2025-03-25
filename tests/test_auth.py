@@ -54,3 +54,16 @@ def test_token_expired_after_time(client, user):
         assert response.json() == {
             'detail': "Could not validate credentials"
         }
+
+
+def test_refresh_token(client, token):
+    response = client.post(
+        '/auth/refresh',
+        headers={'Authorization': f'Bearer {token}'}
+    )
+    data = response.json()
+
+    assert response.status_code == status.HTTP_200_OK
+    assert 'access_token' in data
+    assert 'token_type' in data
+    assert data['token_type'] == 'bearer'
