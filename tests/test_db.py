@@ -17,6 +17,11 @@ async def test_db_create_user(session, mock_valid_user, mock_db_time):
         select(User).where(User.username == mock_valid_user["username"])
     )
 
-    mock_valid_user.update({"id": 1, "created_at": time, "updated_at": time})
+    mock_valid_user.update({
+        "id": 1,
+        "created_at": time,
+        "updated_at": time,
+        "todos": []
+    })
 
     assert asdict(user) == mock_valid_user

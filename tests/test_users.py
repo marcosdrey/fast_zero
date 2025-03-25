@@ -102,9 +102,9 @@ def test_update_user_violates_unique_constraint(
         f"/users/{user.id}/",
         headers={"Authorization": f"Bearer {token}"},
         json={
-            'username': other_user.username,
-            'email': other_user.email,
-            'password': other_user.password
+            "username": other_user.username,
+            "email": other_user.email,
+            "password": other_user.password,
         },
     )
 
