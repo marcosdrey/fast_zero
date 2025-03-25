@@ -57,18 +57,14 @@ async def get_todos(
 
 @router.patch("/{todo_id}", response_model=schemas.TodoPublic)
 async def partial_update_todo(
-    todo_id: int,
-    session: Session,
-    user: CurrentUser,
-    todo: schemas.TodoUpdate
+    todo_id: int, session: Session, user: CurrentUser, todo: schemas.TodoUpdate
 ):
     db_todo = await session.scalar(
         select(Todo).where(Todo.id == todo_id, Todo.user_id == user.id)
     )
     if not db_todo:
         raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Task not found"
+            status_code=status.HTTP_404_NOT_FOUND, detail="Task not found"
         )
 
     for key, value in todo.model_dump(exclude_unset=True).items():
@@ -79,3 +75,16 @@ async def partial_update_todo(
     await session.refresh(db_todo)
 
     return db_todo
+
+
+@router.delete("/{todo_id}", status_code=status.HTTP_204_NO_CONTENT)
+async def delete_todo(todo_id: int, session: Session, user: CurrentUser):
+    db_todo = await session.scalar(
+        select(Todo).where(Todo.id == todo_id, Todo.user_id == user.id)
+    )
+    if not db_todo:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Task not found"
+        )
+    await session.delete(db_todo)
+    await session.commit()

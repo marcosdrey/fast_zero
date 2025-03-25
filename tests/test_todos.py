@@ -159,19 +159,43 @@ async def test_patch_valid_todo(session, client, user, token):
 
     response = client.patch(
         f"/todos/{todo.id}",
-        headers={'Authorization': f'Bearer {token}'},
-        json={"title": "patch title"}
+        headers={"Authorization": f"Bearer {token}"},
+        json={"title": "patch title"},
     )
 
     assert response.status_code == status.HTTP_200_OK
-    assert response.json()['title'] == "patch title"
+    assert response.json()["title"] == "patch title"
 
 
-def test_patch_todo_error(client, token):
+def test_patch_todo_that_does_not_exist_or_does_not_belong_to_current_user(
+    client, token
+):
     response = client.patch(
-        "/todos/10",
-        headers={"Authorization": f"Bearer {token}"},
-        json={}
+        "/todos/10", headers={"Authorization": f"Bearer {token}"}, json={}
     )
     assert response.status_code == status.HTTP_404_NOT_FOUND
-    assert response.json() == {'detail': 'Task not found'}
+    assert response.json() == {"detail": "Task not found"}
+
+
+@pytest.mark.asyncio
+async def test_delete_valid_todo(session, client, user, token):
+    todo = TodoFactory(user_id=user.id)
+    session.add(todo)
+    await session.commit()
+
+    response = client.delete(
+        "/todos/1", headers={"Authorization": f"Bearer {token}"}
+    )
+
+    assert response.status_code == status.HTTP_204_NO_CONTENT
+
+
+def test_delete_todo_that_does_not_exist_or_does_not_belong_to_current_user(
+    client, token
+):
+    response = client.delete(
+        "/todos/10", headers={"Authorization": f"Bearer {token}"}
+    )
+
+    assert response.status_code == status.HTTP_404_NOT_FOUND
+    assert response.json() == {"detail": "Task not found"}
