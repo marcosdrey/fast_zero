@@ -25,7 +25,7 @@ async def test_db_create_user(session, mock_valid_user, mock_db_time):
 
 
 @pytest.mark.asyncio
-async def test_db_create_todo(session, user):
+async def test_db_create_todo(session, user, mock_db_time):
     todo_dict = {
         "title": "Test Todo",
         "description": "Test Desc",
@@ -33,14 +33,16 @@ async def test_db_create_todo(session, user):
         "user_id": user.id,
     }
 
-    todo = Todo(**todo_dict)
-
-    session.add(todo)
-    await session.commit()
+    with mock_db_time(model=Todo) as time:
+        todo = Todo(**todo_dict)
+        session.add(todo)
+        await session.commit()
 
     todo = await session.scalar(select(Todo))
 
-    assert asdict(todo) == dict(**todo_dict, id=1)
+    assert asdict(todo) == dict(
+        **todo_dict, id=1, created_at=time, updated_at=time
+    )
 
 
 @pytest.mark.asyncio
@@ -61,3 +63,19 @@ async def test_db_user_todo_relationship(session, user):
     user = await session.scalar(select(User).where(User.id == user.id))
 
     assert user.todos == [todo]
+
+
+@pytest.mark.asyncio
+async def test_create_todo_with_invalid_state(session, user):
+    todo = Todo(
+        title='todo title',
+        description='todo desc',
+        state='test',
+        user_id=user.id,
+    )
+
+    session.add(todo)
+    await session.commit()
+
+    with pytest.raises(LookupError):
+        await session.scalar(select(Todo))
