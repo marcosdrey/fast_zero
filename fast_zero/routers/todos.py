@@ -1,6 +1,7 @@
 from typing import Annotated
 
-from fastapi import APIRouter, Depends, status
+from fastapi import APIRouter, Depends, Query, status
+from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from fast_zero import schemas
@@ -26,3 +27,29 @@ async def create_todo(
     await session.refresh(db_todo)
 
     return db_todo
+
+
+@router.get("/", response_model=schemas.TodoList)
+async def get_todos(
+    session: Session,
+    user: CurrentUser,
+    todo_filter: Annotated[schemas.FilterTodo, Query()],
+):
+    query = select(Todo).where(Todo.user_id == user.id)
+
+    if todo_filter.title:
+        query = query.where(Todo.title.icontains(todo_filter.title))
+
+    if todo_filter.description:
+        query = query.where(
+            Todo.description.icontains(todo_filter.description)
+        )
+
+    if todo_filter.state:
+        query = query.where(Todo.state == todo_filter.state)
+
+    query = query.offset(todo_filter.offset).limit(todo_filter.limit)
+
+    todos = await session.scalars(query)
+
+    return {"todos": todos.all()}
