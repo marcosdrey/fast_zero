@@ -1,6 +1,6 @@
 from typing import Annotated
 
-from fastapi import APIRouter, Depends, Query, status
+from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -53,3 +53,29 @@ async def get_todos(
     todos = await session.scalars(query)
 
     return {"todos": todos.all()}
+
+
+@router.patch("/{todo_id}", response_model=schemas.TodoPublic)
+async def partial_update_todo(
+    todo_id: int,
+    session: Session,
+    user: CurrentUser,
+    todo: schemas.TodoUpdate
+):
+    db_todo = await session.scalar(
+        select(Todo).where(Todo.id == todo_id, Todo.user_id == user.id)
+    )
+    if not db_todo:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Task not found"
+        )
+
+    for key, value in todo.model_dump(exclude_unset=True).items():
+        setattr(db_todo, key, value)
+
+    session.add(db_todo)
+    await session.commit()
+    await session.refresh(db_todo)
+
+    return db_todo
