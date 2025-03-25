@@ -92,6 +92,15 @@ def mock_valid_updated_user():
     }
 
 
+@pytest.fixture
+def mock_valid_todo():
+    return {
+        "title": "test todo",
+        "description": "test description",
+        "state": "draft",
+    }
+
+
 @pytest_asyncio.fixture
 async def session():
     engine = create_async_engine(

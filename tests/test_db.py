@@ -17,12 +17,9 @@ async def test_db_create_user(session, mock_valid_user, mock_db_time):
         select(User).where(User.username == mock_valid_user["username"])
     )
 
-    mock_valid_user.update({
-        "id": 1,
-        "created_at": time,
-        "updated_at": time,
-        "todos": []
-    })
+    mock_valid_user.update(
+        {"id": 1, "created_at": time, "updated_at": time, "todos": []}
+    )
 
     assert asdict(user) == mock_valid_user
 
@@ -33,7 +30,7 @@ async def test_db_create_todo(session, user):
         "title": "Test Todo",
         "description": "Test Desc",
         "state": "draft",
-        "user_id": user.id
+        "user_id": user.id,
     }
 
     todo = Todo(**todo_dict)
@@ -52,7 +49,7 @@ async def test_db_user_todo_relationship(session, user):
         "title": "Test Todo",
         "description": "Test Desc",
         "state": "draft",
-        "user_id": user.id
+        "user_id": user.id,
     }
 
     todo = Todo(**todo_dict)
@@ -61,8 +58,6 @@ async def test_db_user_todo_relationship(session, user):
     await session.commit()
     await session.refresh(user)
 
-    user = await session.scalar(
-        select(User).where(User.id == user.id)
-    )
+    user = await session.scalar(select(User).where(User.id == user.id))
 
     assert user.todos == [todo]
