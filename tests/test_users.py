@@ -81,11 +81,10 @@ def test_update_user(client, user, mock_valid_updated_user, token):
 
 
 def test_update_user_without_permission(
-    client, token, mock_valid_user, mock_valid_updated_user
+    client, token, other_user, mock_valid_updated_user
 ):
-    new_user = client.post("/users/", json=mock_valid_user)
     response = client.put(
-        f"/users/{new_user.json()['id']}/",
+        f"/users/{other_user.id}/",
         headers={"Authorization": f"Bearer {token}"},
         json=mock_valid_updated_user,
     )
@@ -123,10 +122,9 @@ def test_delete_user(client, user, token):
     assert response.status_code == status.HTTP_204_NO_CONTENT
 
 
-def test_delete_user_without_permission(client, token, mock_valid_user):
-    new_user = client.post("/users/", json=mock_valid_user)
+def test_delete_user_without_permission(client, token, other_user):
     response = client.delete(
-        f"/users/{new_user.json()['id']}/",
+        f"/users/{other_user.id}/",
         headers={"Authorization": f"Bearer {token}"},
     )
 
