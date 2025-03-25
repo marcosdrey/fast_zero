@@ -95,26 +95,24 @@ def test_update_user_without_permission(
     }
 
 
-def test_update_user_violates_unique_constraint(client, user, token):
-    new_user = {
-        "username": "unique_name",
-        "email": "uniquemail@mail.com",
-        "password": "secret",
-    }
-
-    client.post("/users/", json=new_user)
-
+def test_update_user_violates_unique_constraint(
+    client, user, other_user, token
+):
     response = client.put(
         f"/users/{user.id}/",
         headers={"Authorization": f"Bearer {token}"},
-        json=new_user,
+        json={
+            'username': other_user.username,
+            'email': other_user.email,
+            'password': other_user.password
+        },
     )
 
     assert response.status_code == status.HTTP_409_CONFLICT
     assert response.json() == {"detail": "Username or email already exists"}
 
 
-def test_delete_user(client, user, token):
+def test_delete_user(client, token):
     response = client.delete(
         "/users/1/",
         headers={"Authorization": f"Bearer {token}"},

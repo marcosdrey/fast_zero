@@ -49,5 +49,5 @@ async def login_for_access_token(
 
 @router.post("/refresh", response_model=schemas.Token)
 async def refresh_access_token(user: CurrentUser):
-    new_access_token = create_access_token({'sub': user.username})
-    return {'access_token': new_access_token, 'token_type': 'bearer'}
+    new_access_token = create_access_token({"sub": user.username})
+    return {"access_token": new_access_token, "token_type": "bearer"}
