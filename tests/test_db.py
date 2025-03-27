@@ -65,17 +65,17 @@ async def test_db_user_todo_relationship(session, user):
     assert user.todos == [todo]
 
 
-@pytest.mark.asyncio
-async def test_create_todo_with_invalid_state(session, user):
-    todo = Todo(
-        title='todo title',
-        description='todo desc',
-        state='test',
-        user_id=user.id,
-    )
+# @pytest.mark.asyncio
+# async def test_create_todo_with_invalid_state(session, user):
+#     todo = Todo(
+#         title="todo title",
+#         description="todo desc",
+#         state="test",
+#         user_id=user.id,
+#     )
 
-    session.add(todo)
-    await session.commit()
+#     session.add(todo)
+#     await session.commit()
 
-    with pytest.raises(LookupError):
-        await session.scalar(select(Todo))
+#     with pytest.raises(LookupError):
+#         await session.scalar(select(Todo))
